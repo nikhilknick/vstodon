@@ -1,23 +1,39 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	// let counter = 0;
+
+	let accessToken = '';
 	let todos: Array<{ text: string; completed: boolean }> = [];
 	let text = '';
+	let loading = true;
+	let user: { name: string; id: string } | null = null;
 
-	onMount(() => {
+	onMount(async () => {
 		// const res = await fetch(`https://jsonplaceholder.typicode.com/photos?_limit=20`);
 		// let photos = await res.json();
 		// console.log('photos', photos);
 
-		window.addEventListener('message', (event) => {
+		window.addEventListener('message', async (event) => {
 			const message = event.data; // The json data that the extension sent
 			console.log({ message });
 			switch (message.type) {
 				case 'new-todo':
 					todos = [{ text: message.value, completed: false }, ...todos];
 					break;
+				case 'token':
+					accessToken = message.value;
+					const response = await fetch(`${apiBaseUrl}/me`, {
+						headers: {
+							authorization: `Bearer ${accessToken}`,
+						},
+					});
+					const data = await response.json();
+					user = data.user;
+					console.log('userr', user);
+					loading = false;
 			}
 		});
+
+		tsvscode.postMessage({ type: 'get-token', value: undefined });
 	});
 
 	// function handleClick() {
@@ -25,6 +41,14 @@
 	// 	console.log(todos);
 	// }
 </script>
+
+{#if loading}
+	<div>Loading...</div>
+{:else if user}
+	<pre>{JSON.stringify(user,null,2)}</pre>
+{:else}
+	<div>No user is logged in</div>
+{/if}
 
 <form
 	on:submit|preventDefault={() => {

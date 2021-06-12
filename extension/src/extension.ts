@@ -1,17 +1,24 @@
+import { TokenManager } from './TokenManager';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { authenticate } from './authenticate';
 import { HelloWorldPanel } from './HelloWorldPanel';
 import { SidebarProvider } from './SidebarProvider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	console.log('context', context);
+
+	TokenManager.globalState = context.globalState;
+	console.log('token value is',TokenManager.getToken())
+
 	const sidebarProvider = new SidebarProvider(context.extensionUri);
 
 	const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
 	item.text = '$(beaker)  Add Todo';
-    item.command = "vstodon.addTodo";
+	item.command = 'vstodon.addTodo';
 	item.show();
 
 	context.subscriptions.push(
@@ -59,6 +66,16 @@ export function activate(context: vscode.ExtensionContext) {
 			value: text,
 		});
 	});
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('vstodon.authenticate', () => {
+			try {
+				authenticate();
+			} catch (err) {
+				console.log(err);
+			}
+		})
+	);
 
 	context.subscriptions.push(disposable);
 	context.subscriptions.push(secondDisposable);
