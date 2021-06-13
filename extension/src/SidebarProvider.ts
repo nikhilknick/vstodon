@@ -1,3 +1,4 @@
+import { authenticate } from './authenticate';
 import { apiBaseUrl } from './constants';
 import { TokenManager } from './TokenManager';
 import * as vscode from 'vscode';
@@ -25,6 +26,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 			switch (data.type) {
 				case 'get-token': {
 					webviewView.webview.postMessage({ type: 'token', value: TokenManager.getToken() });
+					break;
+				}
+				case 'authenticate': {
+					authenticate(() => {
+						webviewView.webview.postMessage({ type: 'token', value: TokenManager.getToken() });
+					});
+					break;
+				}
+				case 'logout': {
+					TokenManager.setToken('');
 					break;
 				}
 				case 'onInfo': {
