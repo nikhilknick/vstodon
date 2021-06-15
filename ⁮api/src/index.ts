@@ -1,3 +1,5 @@
+import { isAuth } from './isAuth';
+import { Todo } from './entities/Todo';
 import 'reflect-metadata';
 require('dotenv-safe').config();
 import express from 'express';
@@ -30,6 +32,7 @@ const main = async () => {
 	});
 	app.use(cors({ origin: '*' }));
 	app.use(passport.initialize());
+	app.use(express.json());
 
 	passport.use(
 		new GitHubStrategy(
@@ -69,6 +72,32 @@ const main = async () => {
 			res.redirect(`http://localhost:54321/auth/${req.user.accessToken}`);
 		}
 	);
+
+	app.post('/todo', isAuth, async (req, res) => {
+		const todo = await Todo.create({ text: req.body.text, creatorId: req.userId }).save();
+		res.send({ todo });
+	});
+
+	app.get('/todo', isAuth, async (req, res) => {
+		const todos = await Todo.find({ where: { creatorId: req.userId }, order: { id: 'DESC' } });
+
+		res.send({ todos });
+	});
+
+	app.put('/todo', isAuth, async (req, res) => {
+		const todo = await Todo.findOne(req.body.id);
+		if (!todo) {
+			res.send({ todo: null });
+			return;
+		}
+
+		if (todo.creatorId !== req.userId) {
+			throw new Error('not authorized');
+		}
+		todo.completed = !todo.completed;
+		await todo.save();
+		res.send({ todo });
+	});
 
 	//Get the current user
 	app.get('/me', async (req, res) => {

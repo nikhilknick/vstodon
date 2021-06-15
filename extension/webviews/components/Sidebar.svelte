@@ -34,7 +34,7 @@
 	<div>Loading...</div>
 {:else if user}
 	<!-- <pre>{JSON.stringify(user,null,2)}</pre> -->
-	<Todos {user} />
+	<Todos {user} {accessToken} />
 	<button
 		class="button-red"
 		on:click={() => {

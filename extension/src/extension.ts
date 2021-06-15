@@ -68,13 +68,13 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('vstodon.authenticate', () => {
-			try {
-				authenticate();
-			} catch (err) {
-				console.log(err);
-			}
-		})
+		// vscode.commands.registerCommand('vstodon.authenticate', () => {
+		// 	try {
+		// 		authenticate();
+		// 	} catch (err) {
+		// 		console.log(err);
+		// 	}
+		// })
 	);
 
 	context.subscriptions.push(disposable);
